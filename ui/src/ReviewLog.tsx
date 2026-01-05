@@ -11,9 +11,9 @@ type ReviewLogProps = {
 }
 
 const classAccent: Record<string, string> = {
-  PAID: 'var(--accent)',
-  FREE: 'var(--accent-2)',
-  ANON: 'var(--muted)',
+  PAID: 'var(--token-paid)',
+  FREE: 'var(--token-free-border)',
+  ANON: 'var(--token-anon-border)',
 }
 
 const formatTime = (ms: number) => {

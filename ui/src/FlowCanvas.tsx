@@ -43,20 +43,58 @@ const tokenSize = 10
 const queueGrid = { cols: 6, spacing: 14 }
 const serviceGrid = { cols: 4, spacing: 16 }
 const exitGrid = { cols: 4, spacing: 16 }
-const queuedAlpha = 0.6
+const queuedAlpha = 0.5
 const emphasisGlow: Record<string, string> = {
-  PRIORITY_SCHEDULE: 'rgba(31, 42, 68, 0.22)',
-  REJECT_OVERLOAD: 'rgba(55, 65, 81, 0.2)',
+  PRIORITY_SCHEDULE: 'rgba(37, 63, 93, 0.2)',
+  REJECT_OVERLOAD: 'rgba(91, 101, 114, 0.2)',
+}
+const stageRuleOffset = stagePadding.labelTop + stagePadding.labelHeight + 4
+
+const stageSurfaceClass = (stageId: string) => {
+  switch (stageId) {
+    case 'queue':
+      return 'bg-[var(--stage-queue)]'
+    case 'service':
+      return 'bg-[var(--stage-service)]'
+    case 'done':
+      return 'bg-[var(--stage-done)]'
+    case 'rejected':
+      return 'bg-[var(--stage-rejected)]'
+    default:
+      return 'bg-[var(--surface)]'
+  }
+}
+
+const stageLabelClass = (stageId: string) => {
+  switch (stageId) {
+    case 'service':
+      return 'text-[11px] font-medium text-[var(--accent-2)]'
+    case 'done':
+      return 'text-[11px] font-medium text-[var(--ink)]'
+    default:
+      return 'text-[11px] font-medium text-[var(--muted)]'
+  }
+}
+
+const stageRuleColor = (stageId: string) => {
+  switch (stageId) {
+    case 'service':
+      return 'var(--accent-2)'
+    case 'rejected':
+      return 'var(--muted)'
+    default:
+      return 'var(--border)'
+  }
 }
 
 const tokenClassName = (tokenClass: string) => {
   switch (tokenClass) {
     case 'ANON':
-      return 'border border-dashed border-[var(--token-anon-border)] bg-transparent opacity-75'
+      return 'border border-dashed border-[var(--token-anon-border)] bg-[var(--token-anon)]'
     case 'PAID':
-      return 'border-2 border-[var(--token-paid-border)] bg-[var(--token-paid)]'
+      return 'border-2 border-[var(--token-paid-border)] bg-[var(--token-paid)] shadow-[0_0_0_2px_rgba(37,63,93,0.16)]'
     default:
-      return 'border border-[var(--token-free-border)] bg-[var(--token-free)]'
+      return 'border border-[var(--token-free-border)] bg-transparent'
   }
 }
 
@@ -710,8 +748,8 @@ export const FlowCanvas = ({
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-            markerWidth="6"
-            markerHeight="6"
+          markerWidth="5"
+          markerHeight="5"
             orient="auto"
           >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border)" />
@@ -721,19 +759,19 @@ export const FlowCanvas = ({
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-            markerWidth="6"
-            markerHeight="6"
+          markerWidth="5"
+          markerHeight="5"
             orient="auto"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border-soft)" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border)" />
           </marker>
           <marker
             id="flow-arrow-strong"
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-            markerWidth="6"
-            markerHeight="6"
+          markerWidth="5"
+          markerHeight="5"
             orient="auto"
           >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
@@ -751,7 +789,7 @@ export const FlowCanvas = ({
               x2={to.center.x - to.size.width / 2}
               y2={to.center.y}
               stroke="var(--accent)"
-              strokeWidth="2"
+              strokeWidth="1.5"
               strokeOpacity="0.35"
               strokeLinecap="round"
               markerEnd="url(#flow-arrow-strong)"
@@ -787,9 +825,10 @@ export const FlowCanvas = ({
           y1={stageLayouts.queue.center.y}
           x2={stageLayouts.rejected.center.x - stageLayouts.rejected.size.width / 2}
           y2={stageLayouts.rejected.center.y}
-          stroke="var(--border-soft)"
-          strokeWidth="1"
-          strokeDasharray="3 6"
+          stroke="var(--border)"
+          strokeWidth="1.25"
+          strokeOpacity="0.85"
+          strokeDasharray="4 6"
           strokeLinecap="round"
           markerEnd="url(#flow-arrow-muted)"
         />
@@ -814,7 +853,7 @@ export const FlowCanvas = ({
         return (
           <div
             key={stageId}
-            className="absolute rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--ink)]"
+            className={`absolute rounded-2xl border border-[var(--border)] px-4 py-3 text-sm font-medium text-[var(--ink)] shadow-[0_1px_0_rgba(16,20,28,0.04)] ${stageSurfaceClass(stageId)}`}
             style={{
               width: layout.size.width,
               height: layout.size.height,
@@ -822,9 +861,14 @@ export const FlowCanvas = ({
               top: layout.origin.y,
             }}
           >
-            <div className="text-[11px] font-medium text-[var(--muted)]">
-              {label}
-            </div>
+            <div className={stageLabelClass(stageId)}>{label}</div>
+            <div
+              className="absolute left-4 right-4 h-px opacity-60"
+              style={{
+                top: stageRuleOffset,
+                backgroundColor: stageRuleColor(stageId),
+              }}
+            />
             {badgeText ? (
               <span className="absolute right-3 top-2 rounded-full border border-[var(--border-soft)] bg-[var(--paper-soft)] px-2 py-0.5 text-[10px] font-medium text-[var(--muted)]">
                 {badgeText}
