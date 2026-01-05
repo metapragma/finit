@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Manrope:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #101318;
+  --paper: #f6f7f9;
+  --paper-soft: #fcfdff;
+  --surface: #ffffff;
+  --border: #dfe3ea;
+  --muted: #5c6676;
+  --accent: #2b467a;
+  --accent-2: #3f4b61;
+  --accent-soft: #eef2f9;
+  --grid-dot: #eff2f6;
+  --token-paid: #22345d;
+  --token-paid-border: #162541;
+  --token-free: #7b8797;
+  --token-free-border: #5a6677;
+  --token-anon: #c7cdd7;
+  --token-anon-border: #a6b0bf;
+  font-family: 'Manrope', system-ui, sans-serif;
+  color: var(--ink);
+  background-color: var(--paper);
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.font-mono {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+.canvas-grid {
+  background-color: var(--paper-soft);
+  background-image: url("data:image/svg+xml,%3Csvg width='36' height='36' viewBox='0 0 36 36' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1.5' cy='1.5' r='1' fill='%23eff2f6'/%3E%3C/svg%3E");
+  background-size: 36px 36px;
+  background-position: 0 0;
+}
