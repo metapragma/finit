@@ -58,12 +58,12 @@ export const ReviewLog = ({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="border-b border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-xs font-medium text-[var(--muted)]">
+      <div className="border-b border-[var(--border-soft)] px-4 py-3 text-xs font-medium text-[var(--muted)]">
         Review Log
       </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {visibleEvents.length === 0 ? (
-          <div className="m-4 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--paper-soft)] px-4 py-6 text-center text-sm font-medium text-[var(--muted)]">
+          <div className="px-4 py-6 text-center text-sm font-medium text-[var(--muted)]">
             No events yet.
           </div>
         ) : (
@@ -78,7 +78,7 @@ export const ReviewLog = ({
                   key={key}
                   type="button"
                   onClick={() => handleSelect(event, key)}
-                  className={`w-full border-b border-[var(--border)] px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/20 ${
+                  className={`w-full border-b border-[var(--border-soft)] px-4 py-3 text-left text-sm transition-colors last:border-b-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/20 ${
                     isSelected
                       ? 'bg-[var(--accent-soft)]'
                       : 'bg-transparent hover:bg-[var(--paper-soft)]'
@@ -91,7 +91,7 @@ export const ReviewLog = ({
                         className="h-2 w-2 rounded-full"
                         style={{ backgroundColor: accent }}
                       />
-                      <span className="rounded-full border border-[var(--border)] bg-[var(--paper-soft)] px-2 py-0.5 text-[10px] font-medium text-[var(--ink)]">
+                      <span className="text-[10px] font-medium text-[var(--ink)]">
                         {labelForClass(event.class)}
                       </span>
                     </div>

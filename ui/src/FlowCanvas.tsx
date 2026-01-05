@@ -701,7 +701,7 @@ export const FlowCanvas = ({
   return (
     <div
       ref={canvasRef}
-      className="canvas-grid relative h-full w-full overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--paper-soft)]"
+      className="canvas-grid relative h-full w-full overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--paper-soft)]"
     >
       <svg className="absolute inset-0 h-full w-full">
         <defs>
@@ -714,7 +714,7 @@ export const FlowCanvas = ({
             markerHeight="6"
             orient="auto"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border)" />
           </marker>
           <marker
             id="flow-arrow-muted"
@@ -725,7 +725,7 @@ export const FlowCanvas = ({
             markerHeight="6"
             orient="auto"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border)" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border-soft)" />
           </marker>
           <marker
             id="flow-arrow-strong"
@@ -765,7 +765,7 @@ export const FlowCanvas = ({
             stageLayouts.service.center.x - stageLayouts.service.size.width / 2
           }
           y2={stageLayouts.service.center.y}
-          stroke="var(--muted)"
+          stroke="var(--border)"
           strokeWidth="1"
           strokeLinecap="round"
           markerEnd="url(#flow-arrow)"
@@ -777,7 +777,7 @@ export const FlowCanvas = ({
           y1={stageLayouts.service.center.y}
           x2={stageLayouts.done.center.x - stageLayouts.done.size.width / 2}
           y2={stageLayouts.done.center.y}
-          stroke="var(--muted)"
+          stroke="var(--border)"
           strokeWidth="1"
           strokeLinecap="round"
           markerEnd="url(#flow-arrow)"
@@ -787,7 +787,7 @@ export const FlowCanvas = ({
           y1={stageLayouts.queue.center.y}
           x2={stageLayouts.rejected.center.x - stageLayouts.rejected.size.width / 2}
           y2={stageLayouts.rejected.center.y}
-          stroke="var(--border)"
+          stroke="var(--border-soft)"
           strokeWidth="1"
           strokeDasharray="3 6"
           strokeLinecap="round"
@@ -814,7 +814,7 @@ export const FlowCanvas = ({
         return (
           <div
             key={stageId}
-            className="absolute rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--ink)] shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+            className="absolute rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--ink)]"
             style={{
               width: layout.size.width,
               height: layout.size.height,
@@ -826,7 +826,7 @@ export const FlowCanvas = ({
               {label}
             </div>
             {badgeText ? (
-              <span className="absolute right-3 top-2 rounded-full border border-[var(--border)] bg-[var(--paper-soft)] px-2 py-0.5 text-[10px] font-medium text-[var(--muted)]">
+              <span className="absolute right-3 top-2 rounded-full border border-[var(--border-soft)] bg-[var(--paper-soft)] px-2 py-0.5 text-[10px] font-medium text-[var(--muted)]">
                 {badgeText}
               </span>
             ) : null}
@@ -852,7 +852,7 @@ export const FlowCanvas = ({
       </div>
 
       {inspectorEnabled ? (
-        <div className="absolute left-4 top-4 w-56 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-xs text-[var(--ink)] shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+        <div className="absolute left-4 top-4 w-56 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-3 text-xs text-[var(--ink)]">
           <div className="text-[10px] font-medium text-[var(--muted)]">
             Inspector
           </div>
@@ -862,7 +862,7 @@ export const FlowCanvas = ({
             <div>Done: {stateCounts.done}</div>
             <div>Rejected: {stateCounts.rejected}</div>
           </div>
-          <div className="mt-3 border-t border-[var(--border)] pt-2">
+          <div className="mt-3 border-t border-[var(--border-soft)] pt-2">
             <div className="text-[10px] font-medium text-[var(--muted)]">
               Reasons @ tick {currentTick}
             </div>

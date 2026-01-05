@@ -184,7 +184,7 @@ function App() {
 
   return (
     <div className="flex h-screen flex-col bg-[var(--paper)] text-[var(--ink)]">
-      <header className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-6 py-3">
+      <header className="flex items-center justify-between border-b border-[var(--border-soft)] bg-[var(--surface)] px-6 py-3">
         <div className="flex items-center gap-3">
           <div className="text-sm font-medium tracking-[0.06em] text-[var(--ink)]">
             Finit
@@ -221,10 +221,10 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 min-h-0 overflow-hidden px-6 py-4">
-        <div className="grid h-full min-h-0 grid-cols-[220px_1fr_300px] gap-6">
-          <aside className="flex min-h-0 flex-col gap-4 overflow-auto pr-1 text-[var(--ink)]">
-            <div className="pb-4">
+      <main className="flex-1 min-h-0 overflow-hidden pl-6 pr-0 py-3">
+        <div className="grid h-full min-h-0 grid-cols-[200px_1fr_280px] gap-6">
+          <aside className="flex min-h-0 flex-col gap-4 overflow-y-auto border-r border-[var(--border-soft)] pr-6 text-[var(--ink)]">
+            <div className="pb-3">
               <div className="text-[11px] font-medium text-[var(--muted)]">
                 Run Slots
               </div>
@@ -238,10 +238,10 @@ function App() {
                       key={slot}
                       type="button"
                       onClick={() => handleSwitchSlot(slot)}
-                      className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-[13px] font-medium transition-colors ${
+                      className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-[13px] font-medium transition-colors ${
                         isActive
                           ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]'
-                          : 'border-[var(--border)] bg-[var(--paper-soft)] text-[var(--ink)] hover:border-[var(--accent)]'
+                          : 'border-[var(--border-soft)] bg-[var(--surface)] text-[var(--ink)] hover:border-[var(--accent)]'
                       }`}
                     >
                       <span>{slotLabel(slot)}</span>
@@ -254,8 +254,8 @@ function App() {
                   )
                 })}
               </div>
-              <div className="mt-4 grid gap-2">
-                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--paper-soft)]">
+              <div className="mt-3 grid gap-2">
+                <label className="flex cursor-pointer items-center justify-between rounded-lg border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--paper-soft)]">
                   <span>Load Baseline</span>
                   <input
                     type="file"
@@ -264,7 +264,7 @@ function App() {
                     className="hidden"
                   />
                 </label>
-                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--paper-soft)]">
+                <label className="flex cursor-pointer items-center justify-between rounded-lg border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--paper-soft)]">
                   <span>Load High Pressure</span>
                   <input
                     type="file"
@@ -276,17 +276,17 @@ function App() {
               </div>
             </div>
 
-            <div className="border-t border-[var(--border)] pt-4">
+            <div className="border-t border-[var(--border-soft)] pt-4">
               <div className="text-[11px] font-medium text-[var(--muted)]">
                 Inspector
               </div>
               <button
                 type="button"
                 onClick={() => setInspectorEnabled((prev) => !prev)}
-                className={`mt-3 flex w-full items-center justify-between rounded-xl border px-3 py-2 text-[12px] font-medium transition-colors ${
+                className={`mt-3 flex w-full items-center justify-between rounded-lg border px-3 py-2 text-[12px] font-medium transition-colors ${
                   inspectorEnabled
                     ? 'border-[var(--accent)] bg-[var(--accent)] text-white'
-                    : 'border-[var(--border)] bg-[var(--paper-soft)] text-[var(--ink)] hover:border-[var(--accent)]'
+                    : 'border-[var(--border-soft)] bg-[var(--surface)] text-[var(--ink)] hover:border-[var(--accent)]'
                 }`}
               >
                 <span>{inspectorEnabled ? 'On' : 'Off'}</span>
@@ -294,11 +294,11 @@ function App() {
               </button>
             </div>
 
-            <div className="relative border-t border-[var(--border)] pt-4">
+            <div className="relative border-t border-[var(--border-soft)] pt-4">
               <div className="text-[11px] font-medium text-[var(--muted)]">
                 Replay Tools
               </div>
-              <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--paper-soft)] px-3 py-2 text-[11px] text-[var(--ink)]">
+              <div className="mt-3 rounded-lg border border-[var(--border-soft)] bg-[var(--paper-soft)] px-3 py-2 text-[11px] text-[var(--ink)]">
                 <div className="text-[10px] font-medium text-[var(--muted)]">
                   Replay ID
                 </div>
@@ -313,7 +313,7 @@ function App() {
                     artifact &&
                     handleCopy(artifact.metadata.replay_id, 'Replay ID')
                   }
-                  className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--paper-soft)] disabled:cursor-not-allowed disabled:border-[var(--border)] disabled:text-[var(--muted)]"
+                  className="rounded-lg border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--paper-soft)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:text-[var(--muted)]"
                   disabled={!artifact}
                 >
                   Copy Replay ID
@@ -327,7 +327,7 @@ function App() {
                       'Replay reference',
                     )
                   }
-                  className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--paper-soft)] disabled:cursor-not-allowed disabled:border-[var(--border)] disabled:text-[var(--muted)]"
+                  className="rounded-lg border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--paper-soft)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:text-[var(--muted)]"
                   disabled={!artifact}
                 >
                   Copy Reference
@@ -360,7 +360,7 @@ function App() {
                   inspectorEnabled={inspectorEnabled}
                 />
               ) : (
-                <div className="canvas-grid flex h-full items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--paper-soft)] text-sm font-medium text-[var(--muted)]">
+                <div className="canvas-grid flex h-full items-center justify-center rounded-xl border border-[var(--border-soft)] bg-[var(--paper-soft)] text-[13px] font-medium text-[var(--muted)]">
                   {loadError ??
                     `Load the ${activeLabel.toLowerCase()} run artifact to start playback.`}
                 </div>
@@ -368,7 +368,7 @@ function App() {
             </div>
           </section>
 
-          <aside className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+          <aside className="flex min-h-0 flex-col overflow-hidden border-l border-[var(--border-soft)]">
             <ReviewLog
               artifact={artifact}
               currentTick={currentTick}
@@ -380,12 +380,12 @@ function App() {
         </div>
       </main>
 
-      <footer className="border-t border-[var(--border)] bg-[var(--surface)] px-6 py-3">
+      <footer className="border-t border-[var(--border-soft)] bg-[var(--surface)] px-6 py-3">
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={handleTogglePlay}
-            className="rounded-lg border border-[var(--border)] bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-2)] disabled:cursor-not-allowed disabled:border-[var(--border)] disabled:bg-[var(--border)]"
+            className="rounded-md border border-[var(--border-soft)] bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-2)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:bg-[var(--border-soft)]"
             disabled={!artifact}
           >
             {isPlaying ? 'Pause' : 'Play'}
