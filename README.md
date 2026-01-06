@@ -4,6 +4,11 @@ Finit is a visual design-review artifact that helps bridge the understanding gap
 
 This repository contains the MVP of a larger product. The MVP focuses on a single, canonical scenario to validate the narrative and interaction model. The long-term plan is to expand to multiple design-review scenarios that explain similar system trade-offs.
 
+![Go](https://img.shields.io/badge/Go-1.23-00ADD8?logo=go&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-2ea44f)
+[![CI](https://github.com/metapragma/finit/actions/workflows/ci.yml/badge.svg)](https://github.com/metapragma/finit/actions/workflows/ci.yml)
+
 ## What it does
 - Turns engine output into a clear, replayable, visual narrative of load, prioritization, and trade-offs.
 - Makes the engine’s reasoning legible without turning the UI into a simulator.

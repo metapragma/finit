@@ -46,10 +46,13 @@ if [ ${#GO_DIRS[@]} -gt 0 ]; then
   ./scripts/lint-go.sh "${GO_PATHS[@]}"
 fi
 
-if [ ${#UI_LINT_FILES[@]} -gt 0 ]; then
-  pnpm -C ui eslint --max-warnings=0 "${UI_LINT_FILES[@]}"
-fi
-
-if [ ${#UI_FORMAT_FILES[@]} -gt 0 ]; then
-  pnpm -C ui prettier --check "${UI_FORMAT_FILES[@]}"
+if [ ${#UI_LINT_FILES[@]} -gt 0 ] || [ ${#UI_FORMAT_FILES[@]} -gt 0 ]; then
+  pushd "${ROOT_DIR}/ui" >/dev/null
+  if [ ${#UI_LINT_FILES[@]} -gt 0 ]; then
+    pnpm exec eslint --max-warnings=0 "${UI_LINT_FILES[@]}"
+  fi
+  if [ ${#UI_FORMAT_FILES[@]} -gt 0 ]; then
+    pnpm exec prettier --check "${UI_FORMAT_FILES[@]}"
+  fi
+  popd >/dev/null
 fi
