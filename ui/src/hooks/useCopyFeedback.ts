@@ -20,13 +20,15 @@ export const useCopyFeedback = () => {
     }, 2800)
   }
 
-  const handleCopy = async (value: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(value)
-      showStatus(`${label} copied`)
-    } catch (error) {
-      showStatus('Copy failed')
-    }
+  const handleCopy = (value: string, label: string) => {
+    void (async () => {
+      try {
+        await navigator.clipboard.writeText(value)
+        showStatus(`${label} copied`)
+      } catch {
+        showStatus('Copy failed')
+      }
+    })()
   }
 
   useEffect(() => {

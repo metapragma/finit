@@ -647,7 +647,15 @@ export const FlowCanvas = ({
     }
 
     return layouts
-  }, [anchors, canvasSize.height, canvasSize.width, stageCounts, stagePadding, stageSizes])
+  }, [
+    anchors,
+    canvasSize.height,
+    canvasSize.width,
+    resolvedFlowLayout,
+    stageCounts,
+    stagePadding,
+    stageSizes,
+  ])
 
   const { tokenStateMap, stageIndexMap, visibleTokenIds, alphaMap } = useMemo(() => {
     const tokenMap = new Map<string, TokenState>()
@@ -833,7 +841,7 @@ export const FlowCanvas = ({
     if (entries.length === 0) return
 
     const timeline = gsap.timeline({
-      defaults: { ease: 'sine.out', overwrite: 'none' },
+      defaults: { ease: 'sine.out', overwrite: false },
     })
 
     for (const [tokenId, glow] of entries) {

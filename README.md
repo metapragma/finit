@@ -44,6 +44,12 @@ make lint-ui
 Tool versions are pinned in `.tool-versions`. If `golangci-lint` is not on your PATH,
 `./scripts/lint-go.sh` will run the pinned version via `go run`.
 
+Dependency audits:
+
+```sh
+make audit
+```
+
 ## Formatting
 Formatting is standardized in `.editorconfig`. UI formatting uses Prettier:
 

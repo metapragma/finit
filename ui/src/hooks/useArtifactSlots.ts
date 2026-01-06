@@ -26,36 +26,39 @@ export const useArtifactSlots = ({ onSlotChange }: UseArtifactSlotsArgs = {}) =>
   const loadError = activeSlot === 'baseline' ? baselineError : pressureError
   const activeLabel = slotLabel(activeSlot)
 
-  const handleFile = (slot: RunSlot) => async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+  const handleFile = (slot: RunSlot) => (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.target
+    const file = input.files?.[0]
     if (!file) return
 
     const setError = slot === 'baseline' ? setBaselineError : setPressureError
     const setArtifact = slot === 'baseline' ? setBaselineArtifact : setPressureArtifact
 
-    try {
-      const text = await file.text()
-      const json = JSON.parse(text)
-      const result = parseArtifact(json)
-      if (!result.ok) {
-        setError(result.error)
-        return
-      }
+    void (async () => {
+      try {
+        const text = await file.text()
+        const json: unknown = JSON.parse(text)
+        const result = parseArtifact(json)
+        if (!result.ok) {
+          setError(result.error)
+          return
+        }
 
-      if (scenarioGate && result.artifact.metadata.scenario_id !== scenarioGate) {
-        setError('Scenario mismatch. MVP supports one scenario only.')
-        return
-      }
+        if (scenarioGate && result.artifact.metadata.scenario_id !== scenarioGate) {
+          setError('Scenario mismatch. MVP supports one scenario only.')
+          return
+        }
 
-      setArtifact(result.artifact)
-      setError(null)
-      setActiveSlot(slot)
-      onSlotChange?.()
-    } catch (error) {
-      setError('Unable to parse artifact JSON.')
-    } finally {
-      event.target.value = ''
-    }
+        setArtifact(result.artifact)
+        setError(null)
+        setActiveSlot(slot)
+        onSlotChange?.()
+      } catch {
+        setError('Unable to parse artifact JSON.')
+      } finally {
+        input.value = ''
+      }
+    })()
   }
 
   const handleSwitchSlot = (slot: RunSlot) => {

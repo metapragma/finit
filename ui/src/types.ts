@@ -12,7 +12,7 @@ export type Metadata = {
 
 export type TokenState = {
   id: string
-  class: TokenClass | string
+  class: TokenClass
   state: string
   stage_id: string
   queue_index: number

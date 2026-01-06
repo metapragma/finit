@@ -44,10 +44,12 @@ export const usePlayback = (artifact: Artifact | null, options: UsePlaybackOptio
     return () => window.clearInterval(interval)
   }, [artifact, isPlaying, playbackInterval])
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setCurrentTick(0)
     setIsPlaying(false)
   }, [artifact, resetKey])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleTogglePlay = () => {
     if (!artifact) return

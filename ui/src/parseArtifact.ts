@@ -1,4 +1,4 @@
-import type { Artifact, Metadata, Snapshot, TokenState, StageState, Event } from './types'
+import type { Artifact, Metadata, Snapshot, TokenClass, TokenState, StageState, Event } from './types'
 
 type ParseResult = { ok: true; artifact: Artifact } | { ok: false; error: string }
 
@@ -11,6 +11,9 @@ const isNumber = (value: unknown): value is number =>
 const isString = (value: unknown): value is string => typeof value === 'string'
 
 const isArray = (value: unknown): value is unknown[] => Array.isArray(value)
+
+const isTokenClass = (value: unknown): value is TokenClass =>
+  value === 'ANON' || value === 'FREE' || value === 'PAID'
 
 export function parseArtifact(data: unknown): ParseResult {
   if (!isRecord(data)) {
@@ -69,7 +72,7 @@ export function parseArtifact(data: unknown): ParseResult {
       }
       if (
         !isString(token.id) ||
-        !isString(token.class) ||
+        !isTokenClass(token.class) ||
         !isString(token.state) ||
         !isString(token.stage_id) ||
         !isNumber(token.queue_index) ||
