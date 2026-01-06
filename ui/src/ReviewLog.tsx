@@ -23,8 +23,7 @@ const formatTime = (ms: number) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
-const buildEventKey = (event: Event, index: number) =>
-  `${event.tick}-${event.token_id}-${index}`
+const buildEventKey = (event: Event, index: number) => `${event.tick}-${event.token_id}-${index}`
 
 export const ReviewLog = ({
   artifact,
@@ -78,7 +77,7 @@ export const ReviewLog = ({
                   key={key}
                   type="button"
                   onClick={() => handleSelect(event, key)}
-                  className={`w-full border-b border-[var(--border-soft)] px-3 py-3 text-left text-sm transition-colors last:border-b-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/20 sm:px-4 ${
+                  className={`focus-visible:ring-[var(--accent)]/20 w-full border-b border-[var(--border-soft)] px-3 py-3 text-left text-sm transition-colors last:border-b-0 focus-visible:outline-none focus-visible:ring-2 sm:px-4 ${
                     isSelected
                       ? 'bg-[var(--accent-soft)]'
                       : 'bg-transparent hover:bg-[var(--paper-soft)]'
@@ -87,10 +86,7 @@ export const ReviewLog = ({
                   <div className="flex items-center justify-between text-[11px] font-medium text-[var(--muted)]">
                     <span>{formatTime(time)}</span>
                     <div className="flex items-center gap-2">
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: accent }}
-                      />
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent }} />
                       <span className="text-[10px] font-medium text-[var(--ink)]">
                         {labelForClass(event.class)}
                       </span>

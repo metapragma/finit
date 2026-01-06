@@ -43,21 +43,19 @@ const STAGE_ORDER = ['queue', 'service', 'done', 'rejected']
 
 const gridUnit = 32
 
-const stageBaseSizesDefault: Record<string, { width: number; height: number }> =
-  {
-    queue: { width: 192, height: 96 },
-    service: { width: 192, height: 96 },
-    done: { width: 288, height: 192 },
-    rejected: { width: 288, height: 192 },
-  }
+const stageBaseSizesDefault: Record<string, { width: number; height: number }> = {
+  queue: { width: 192, height: 96 },
+  service: { width: 192, height: 96 },
+  done: { width: 288, height: 192 },
+  rejected: { width: 288, height: 192 },
+}
 
-const stageBaseSizesVertical: Record<string, { width: number; height: number }> =
-  {
-    queue: { width: 168, height: 88 },
-    service: { width: 168, height: 88 },
-    done: { width: 160, height: 148 },
-    rejected: { width: 160, height: 148 },
-  }
+const stageBaseSizesVertical: Record<string, { width: number; height: number }> = {
+  queue: { width: 168, height: 88 },
+  service: { width: 168, height: 88 },
+  done: { width: 160, height: 148 },
+  rejected: { width: 160, height: 148 },
+}
 
 type StagePadding = {
   x: number
@@ -127,8 +125,7 @@ const stageRuleColor = (stageId: string) => {
   }
 }
 
-const stageRuleOffset = (padding: StagePadding) =>
-  padding.labelTop + padding.labelHeight + 4
+const stageRuleOffset = (padding: StagePadding) => padding.labelTop + padding.labelHeight + 4
 
 const tokenClassName = (tokenClass: string) => {
   switch (tokenClass) {
@@ -141,29 +138,15 @@ const tokenClassName = (tokenClass: string) => {
   }
 }
 
-const motionProfile = (
-  tokenState: TokenState | undefined,
-  animationDuration: number,
-) => {
+const motionProfile = (tokenState: TokenState | undefined, animationDuration: number) => {
   if (!tokenState) {
     return { duration: animationDuration, delay: 0 }
   }
 
-  const durationScale =
-    tokenState.class === 'PAID'
-      ? 0.6
-      : tokenState.class === 'FREE'
-        ? 0.8
-        : 1
+  const durationScale = tokenState.class === 'PAID' ? 0.6 : tokenState.class === 'FREE' ? 0.8 : 1
   const waitDelay = tokenState.state === 'queued' ? animationDuration * 0.35 : 0
-  const available = Math.max(
-    animationDuration - waitDelay,
-    animationDuration * 0.45,
-  )
-  const duration = Math.max(
-    0.12,
-    Math.min(available * durationScale, animationDuration),
-  )
+  const available = Math.max(animationDuration - waitDelay, animationDuration * 0.45)
+  const duration = Math.max(0.12, Math.min(available * durationScale, animationDuration))
 
   return { duration, delay: waitDelay }
 }
@@ -188,10 +171,7 @@ const stageAnchorsFromSize = (
     const bottom = height - margin
     const rowY = bottom - rowHeight / 2
     const rowTop = rowY - rowHeight / 2
-    const gapBudget = Math.max(
-      0,
-      rowTop - top - queueSize.height - serviceSize.height,
-    )
+    const gapBudget = Math.max(0, rowTop - top - queueSize.height - serviceSize.height)
     let gap1 = gapBudget * 0.35
     let gap2 = gapBudget * 0.65
     if (gapBudget >= minGap * 2) {
@@ -206,15 +186,11 @@ const stageAnchorsFromSize = (
     }
 
     const serviceY = rowTop - gap2 - serviceSize.height / 2
-    const queueY =
-      serviceY - gap1 - (queueSize.height + serviceSize.height) / 2
+    const queueY = serviceY - gap1 - (queueSize.height + serviceSize.height) / 2
 
     const availableWidth = width - margin * 2
     const baseRowWidth = doneSize.width + rejectedSize.width
-    const gapX = Math.max(
-      0,
-      Math.min(gridUnit * 0.6, (availableWidth - baseRowWidth) / 2),
-    )
+    const gapX = Math.max(0, Math.min(gridUnit * 0.6, (availableWidth - baseRowWidth) / 2))
     const totalRowWidth = baseRowWidth + gapX
     const startX = (width - totalRowWidth) / 2
     const doneX = startX + doneSize.width / 2
@@ -241,10 +217,7 @@ const stageAnchorsFromSize = (
 
   const available = width - margin * 2
   const baseTotal = queueSize.width + serviceSize.width + rightWidth
-  const horizontalGap = Math.max(
-    minGap,
-    Math.floor((available - baseTotal) / 2),
-  )
+  const horizontalGap = Math.max(minGap, Math.floor((available - baseTotal) / 2))
   const leftX = queueSize.width / 2 + margin
   const maxRightX = width - rightWidth / 2 - margin
 
@@ -257,10 +230,7 @@ const stageAnchorsFromSize = (
     const minServiceX = leftX + (queueSize.width + serviceSize.width) / 2 + minGap
     if (serviceX < minServiceX) {
       serviceX = minServiceX
-      rightX = Math.min(
-        maxRightX,
-        serviceX + (serviceSize.width + rightWidth) / 2 + minGap,
-      )
+      rightX = Math.min(maxRightX, serviceX + (serviceSize.width + rightWidth) / 2 + minGap)
     } else {
       rightX = maxRightX
     }
@@ -278,19 +248,15 @@ const stageAnchorsFromSize = (
   const doneHalf = stageSizes.done.height / 2
   const rejectedHalf = stageSizes.rejected.height / 2
   const minVerticalGap = doneHalf + rejectedHalf + gridUnit
-  const maxGap =
-    height - (doneHalf + rejectedHalf + gridUnit * 4)
+  const maxGap = height - (doneHalf + rejectedHalf + gridUnit * 4)
   const desiredGap = doneHalf + rejectedHalf + gridUnit * 3
-  const verticalGap = snapToGrid(
-    Math.max(minVerticalGap, Math.min(desiredGap, maxGap)),
-  )
+  const verticalGap = snapToGrid(Math.max(minVerticalGap, Math.min(desiredGap, maxGap)))
   const columnCenter = snapToGrid(height * 0.52)
 
   let doneY = columnCenter - verticalGap / 2
   let rejectedY = columnCenter + verticalGap / 2
 
-  const serviceBottom =
-    service.y + stageSizes.service.height / 2 + gridUnit
+  const serviceBottom = service.y + stageSizes.service.height / 2 + gridUnit
   const t = (service.x - queue.x) / (rightX - queue.x)
   if (t > 0 && t < 1) {
     const lineY = queue.y + (rejectedY - queue.y) * t
@@ -333,11 +299,9 @@ const positionForGrid = (index: number, cols: number, spacing: number) => {
   }
 }
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max)
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
-const snapToGrid = (value: number) =>
-  Math.round(value / gridUnit) * gridUnit
+const snapToGrid = (value: number) => Math.round(value / gridUnit) * gridUnit
 
 type StageLayout = {
   id: string
@@ -373,11 +337,9 @@ const resolveStageSizes = (
   const rowWidth = base.done.width + base.rejected.width + minGapX
   const rowHeight = Math.max(base.done.height, base.rejected.height)
   const minGap = gridUnit / 4
-  const baseTotalHeight =
-    base.queue.height + base.service.height + rowHeight + minGap * 2
+  const baseTotalHeight = base.queue.height + base.service.height + rowHeight + minGap * 2
   const widthScale = rowWidth > 0 ? Math.min(1, availableWidth / rowWidth) : 1
-  const heightScale =
-    baseTotalHeight > 0 ? Math.min(1, availableHeight / baseTotalHeight) : 1
+  const heightScale = baseTotalHeight > 0 ? Math.min(1, availableHeight / baseTotalHeight) : 1
   const scale = clamp(Math.min(widthScale, heightScale), 0.6, 1.05)
 
   return {
@@ -400,11 +362,7 @@ const resolveStageSizes = (
   }
 }
 
-const connectionLine = (
-  from: StageLayout,
-  to: StageLayout,
-  flowLayout: FlowLayout,
-) => {
+const connectionLine = (from: StageLayout, to: StageLayout, flowLayout: FlowLayout) => {
   if (flowLayout === 'vertical') {
     return {
       x1: from.center.x,
@@ -429,10 +387,7 @@ const buildTokenPositions = (
   stageLayouts: Record<string, StageLayout>,
   alphaMap: Map<string, number>,
 ) => {
-  const positions = new Map<
-    string,
-    { x: number; y: number; visible: boolean; alpha: number }
-  >()
+  const positions = new Map<string, { x: number; y: number; visible: boolean; alpha: number }>()
 
   for (const token of tokens) {
     const state = tokenStateMap.get(token.id)
@@ -450,7 +405,7 @@ const buildTokenPositions = (
     const index =
       state.stage_id === 'queue' && state.queue_index >= 0
         ? state.queue_index
-        : stageIndex.get(state.id) ?? 0
+        : (stageIndex.get(state.id) ?? 0)
 
     const grid = positionForGrid(index, layout.grid.cols, layout.grid.spacing)
 
@@ -486,8 +441,7 @@ export const FlowCanvas = ({
   const emphasisTimelineRef = useRef<gsap.core.Timeline | null>(null)
   const emphasisTokenIdsRef = useRef<string[]>([])
 
-  const snapshot =
-    artifact.snapshots[Math.min(currentTick, artifact.snapshots.length - 1)]
+  const snapshot = artifact.snapshots[Math.min(currentTick, artifact.snapshots.length - 1)]
 
   const stageStates = useMemo(() => {
     const map = new Map<string, { queue: number; used: number; total: number }>()
@@ -532,10 +486,11 @@ export const FlowCanvas = ({
   }, [artifact])
 
   const highlightSegments = useMemo(() => {
-    if (!highlightedTokenId) return [] as Array<{
-      from: string
-      to: string
-    }>
+    if (!highlightedTokenId)
+      return [] as Array<{
+        from: string
+        to: string
+      }>
 
     let lastStage: string | null = null
     const stages: string[] = []
@@ -590,8 +545,7 @@ export const FlowCanvas = ({
   }, [snapshot])
 
   const resolvedFlowLayout = useMemo(
-    () =>
-      flowLayout ?? resolveFlowLayout(canvasSize.width, canvasSize.height),
+    () => flowLayout ?? resolveFlowLayout(canvasSize.width, canvasSize.height),
     [canvasSize, flowLayout],
   )
   const stageSizes = useMemo(
@@ -599,24 +553,12 @@ export const FlowCanvas = ({
     [resolvedFlowLayout, canvasSize],
   )
   const stagePadding = useMemo(
-    () =>
-      resolvedFlowLayout === 'vertical'
-        ? stagePaddingVertical
-        : stagePaddingDefault,
+    () => (resolvedFlowLayout === 'vertical' ? stagePaddingVertical : stagePaddingDefault),
     [resolvedFlowLayout],
   )
-  const ruleOffset = useMemo(
-    () => stageRuleOffset(stagePadding),
-    [stagePadding],
-  )
+  const ruleOffset = useMemo(() => stageRuleOffset(stagePadding), [stagePadding])
   const anchors = useMemo(
-    () =>
-      stageAnchorsFromSize(
-        canvasSize.width,
-        canvasSize.height,
-        resolvedFlowLayout,
-        stageSizes,
-      ),
+    () => stageAnchorsFromSize(canvasSize.width, canvasSize.height, resolvedFlowLayout, stageSizes),
     [canvasSize, resolvedFlowLayout, stageSizes],
   )
 
@@ -625,15 +567,9 @@ export const FlowCanvas = ({
 
     for (const stageId of STAGE_ORDER) {
       const size = stageSizes[stageId] ?? stageSizes.queue
-      const grid =
-        stageId === 'queue'
-          ? queueGrid
-          : stageId === 'service'
-            ? serviceGrid
-            : exitGrid
+      const grid = stageId === 'queue' ? queueGrid : stageId === 'service' ? serviceGrid : exitGrid
       const padding = stagePadding
-      const tokenTopOffset =
-        padding.labelTop + padding.labelHeight + padding.bottom
+      const tokenTopOffset = padding.labelTop + padding.labelHeight + padding.bottom
       const contentHeight = size.height - tokenTopOffset - padding.bottom
       const contentWidth = size.width - padding.x * 2
       let spacing = grid.spacing
@@ -641,10 +577,7 @@ export const FlowCanvas = ({
       let rows = 1
 
       if (stageId === 'done' || stageId === 'rejected') {
-        cols = Math.max(
-          1,
-          Math.floor((contentWidth - tokenSize) / grid.spacing) + 1,
-        )
+        cols = Math.max(1, Math.floor((contentWidth - tokenSize) / grid.spacing) + 1)
         if (cols > 1) {
           spacing = (contentWidth - tokenSize) / (cols - 1)
         }
@@ -735,9 +668,7 @@ export const FlowCanvas = ({
       }
     }
 
-    grouped.queue.sort(
-      (a, b) => a.queue_index - b.queue_index || a.id.localeCompare(b.id),
-    )
+    grouped.queue.sort((a, b) => a.queue_index - b.queue_index || a.id.localeCompare(b.id))
     grouped.queue.forEach((token, idx) => {
       stageIndex.set(token.id, idx)
       visibleIds.add(token.id)
@@ -914,11 +845,7 @@ export const FlowCanvas = ({
         { filter: `drop-shadow(0 0 6px ${glow})`, duration: 0.35 },
         0,
       )
-      timeline.to(
-        el,
-        { filter: 'drop-shadow(0 0 0 rgba(0, 0, 0, 0))', duration: 0.45 },
-        0.35,
-      )
+      timeline.to(el, { filter: 'drop-shadow(0 0 0 rgba(0, 0, 0, 0))', duration: 0.45 }, 0.35)
     }
 
     emphasisTimelineRef.current = timeline
@@ -936,8 +863,8 @@ export const FlowCanvas = ({
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-          markerWidth="5"
-          markerHeight="5"
+            markerWidth="5"
+            markerHeight="5"
             orient="auto"
           >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border)" />
@@ -947,8 +874,8 @@ export const FlowCanvas = ({
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-          markerWidth="5"
-          markerHeight="5"
+            markerWidth="5"
+            markerHeight="5"
             orient="auto"
           >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border)" />
@@ -958,8 +885,8 @@ export const FlowCanvas = ({
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
-          markerWidth="5"
-          markerHeight="5"
+            markerWidth="5"
+            markerHeight="5"
             orient="auto"
           >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
@@ -1005,11 +932,7 @@ export const FlowCanvas = ({
           )
         })()}
         {(() => {
-          const coords = connectionLine(
-            stageLayouts.service,
-            stageLayouts.done,
-            resolvedFlowLayout,
-          )
+          const coords = connectionLine(stageLayouts.service, stageLayouts.done, resolvedFlowLayout)
           return (
             <line
               x1={coords.x1}
@@ -1106,9 +1029,7 @@ export const FlowCanvas = ({
               tokenRefs.current[token.id] = el
             }}
             className={`absolute rounded-full ${
-              token.id === highlightedTokenId
-                ? 'ring-2 ring-[var(--ink)]'
-                : ''
+              token.id === highlightedTokenId ? 'ring-2 ring-[var(--ink)]' : ''
             } ${tokenClassName(token.class)}`}
             style={{ width: tokenSize, height: tokenSize }}
           />
@@ -1117,9 +1038,7 @@ export const FlowCanvas = ({
 
       {inspectorEnabled && showInspectorOverlay && inspectorStateCounts ? (
         <div className="absolute left-4 top-4 w-56 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-3 text-xs text-[var(--ink)]">
-          <div className="text-[10px] font-medium text-[var(--muted)]">
-            Inspector
-          </div>
+          <div className="text-[10px] font-medium text-[var(--muted)]">Inspector</div>
           <div className="mt-2 space-y-1">
             <div>Queued: {inspectorStateCounts.queued}</div>
             <div>Processing: {inspectorStateCounts.processing}</div>
@@ -1134,13 +1053,11 @@ export const FlowCanvas = ({
               <div className="mt-1 text-[11px] text-[var(--muted)]">No events</div>
             ) : (
               <div className="mt-1 space-y-1 text-[11px]">
-                {Array.from(inspectorReasonCounts ?? []).map(
-                  ([reason, count]) => (
-                    <div key={reason}>
-                      {reason} × {count}
-                    </div>
-                  ),
-                )}
+                {Array.from(inspectorReasonCounts ?? []).map(([reason, count]) => (
+                  <div key={reason}>
+                    {reason} × {count}
+                  </div>
+                ))}
               </div>
             )}
           </div>

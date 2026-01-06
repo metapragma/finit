@@ -1,10 +1,7 @@
 import { useMemo } from 'react'
 import type { Artifact } from '../types'
 
-export const useInspectorData = (
-  artifact: Artifact | null,
-  currentTick: number,
-) => {
+export const useInspectorData = (artifact: Artifact | null, currentTick: number) => {
   const snapshot = useMemo(() => {
     if (!artifact) return null
     return artifact.snapshots[Math.min(currentTick, artifact.snapshots.length - 1)]

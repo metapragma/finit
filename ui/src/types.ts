@@ -47,4 +47,3 @@ export type Artifact = {
   snapshots: Snapshot[]
   events: Event[]
 }
-

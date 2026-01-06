@@ -6,10 +6,7 @@ type UsePlaybackOptions = {
   resetKey?: string | number | null
 }
 
-export const usePlayback = (
-  artifact: Artifact | null,
-  options: UsePlaybackOptions = {},
-) => {
+export const usePlayback = (artifact: Artifact | null, options: UsePlaybackOptions = {}) => {
   const playbackScale = options.playbackScale ?? 3
   const resetKey = options.resetKey ?? null
   const [currentTick, setCurrentTick] = useState(0)

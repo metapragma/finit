@@ -56,39 +56,28 @@ function App() {
   const viewportWidth = useViewportWidth()
   const isMobile = viewportWidth < 640
   const isCompact = viewportWidth < 768
-  const flowLayoutMode: 'horizontal' | 'vertical' = isCompact
-    ? 'vertical'
-    : 'horizontal'
+  const flowLayoutMode: 'horizontal' | 'vertical' = isCompact ? 'vertical' : 'horizontal'
 
-  const versionMismatch =
-    artifact && artifact.metadata.engine_version !== UI_ENGINE_VERSION
+  const versionMismatch = artifact && artifact.metadata.engine_version !== UI_ENGINE_VERSION
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--paper)] text-[var(--ink)] lg:h-screen">
       <header className="flex flex-col gap-2 border-b border-[var(--border-soft)] bg-transparent px-4 py-2 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-4">
-          <div className="text-[12px] font-medium tracking-[0.04em] text-[var(--ink)]">
-            Finit
-          </div>
-          <div className="text-[11px] text-[var(--muted)]">
-            Design review playback
-          </div>
+          <div className="text-[12px] font-medium tracking-[0.04em] text-[var(--ink)]">Finit</div>
+          <div className="text-[11px] text-[var(--muted)]">Design review playback</div>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-[11px] text-[var(--muted)]">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] tracking-[0.04em] text-[var(--muted)]">
-              Scenario
-            </span>
+            <span className="text-[10px] tracking-[0.04em] text-[var(--muted)]">Scenario</span>
             <span className="text-[12px] text-[var(--ink)]">
               {artifact?.metadata.scenario_id ?? '—'} · {activeLabel}
             </span>
           </div>
           <div className="hidden h-3 w-px bg-[var(--border-soft)] sm:block" />
           <div className="flex items-center gap-2">
-            <span className="text-[10px] tracking-[0.04em] text-[var(--muted)]">
-              Replay
-            </span>
-            <span className="max-w-[160px] truncate text-[12px] text-[var(--ink)] font-mono sm:max-w-[200px]">
+            <span className="text-[10px] tracking-[0.04em] text-[var(--muted)]">Replay</span>
+            <span className="max-w-[160px] truncate font-mono text-[12px] text-[var(--ink)] sm:max-w-[200px]">
               {artifact?.metadata.replay_id ?? '—'}
             </span>
           </div>
@@ -103,18 +92,15 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 min-h-0 overflow-y-auto px-4 py-3 sm:px-6 lg:overflow-hidden">
+      <main className="min-h-0 flex-1 overflow-y-auto px-4 py-3 sm:px-6 lg:overflow-hidden">
         <div className="flex min-h-0 flex-col gap-4 lg:grid lg:h-full lg:grid-cols-[200px_1fr_280px] lg:gap-6">
           <aside className="order-2 flex flex-col gap-4 overflow-visible rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-4 text-[var(--ink)] lg:order-1 lg:min-h-0 lg:overflow-y-auto lg:rounded-none lg:border-0 lg:border-r lg:bg-transparent lg:p-0 lg:pr-6">
             <div className="pb-3">
-              <div className="text-[11px] font-medium text-[var(--muted)]">
-                Run Slots
-              </div>
+              <div className="text-[11px] font-medium text-[var(--muted)]">Run Slots</div>
               <div className="mt-3 flex flex-col gap-2">
                 {(['baseline', 'pressure'] as const).map((slot) => {
                   const isActive = slot === activeSlot
-                  const isLoaded =
-                    slot === 'baseline' ? baselineArtifact : pressureArtifact
+                  const isLoaded = slot === 'baseline' ? baselineArtifact : pressureArtifact
                   return (
                     <button
                       key={slot}
@@ -159,9 +145,7 @@ function App() {
             </div>
 
             <div className="border-t border-[var(--border-soft)] pt-4">
-              <div className="text-[11px] font-medium text-[var(--muted)]">
-                Inspector
-              </div>
+              <div className="text-[11px] font-medium text-[var(--muted)]">Inspector</div>
               <button
                 type="button"
                 onClick={() => setInspectorEnabled((prev) => !prev)}
@@ -176,9 +160,7 @@ function App() {
               </button>
               {inspectorEnabled && isMobile && stateCounts ? (
                 <div className="mt-3 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-3 text-xs text-[var(--ink)]">
-                  <div className="text-[10px] font-medium text-[var(--muted)]">
-                    Inspector
-                  </div>
+                  <div className="text-[10px] font-medium text-[var(--muted)]">Inspector</div>
                   <div className="mt-2 space-y-1 text-[11px]">
                     <div>Queued: {stateCounts.queued}</div>
                     <div>Processing: {stateCounts.processing}</div>
@@ -188,18 +170,14 @@ function App() {
                       Reasons @ tick {currentTick}
                     </div>
                     {reasonCounts && reasonCounts.size === 0 ? (
-                      <div className="mt-1 text-[11px] text-[var(--muted)]">
-                        No events
-                      </div>
+                      <div className="mt-1 text-[11px] text-[var(--muted)]">No events</div>
                     ) : (
                       <div className="mt-1 space-y-1 text-[11px]">
-                        {Array.from(reasonCounts ?? []).map(
-                          ([reason, count]) => (
-                            <div key={reason}>
-                              {reason} × {count}
-                            </div>
-                          ),
-                        )}
+                        {Array.from(reasonCounts ?? []).map(([reason, count]) => (
+                          <div key={reason}>
+                            {reason} × {count}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -208,24 +186,17 @@ function App() {
             </div>
 
             <div className="relative border-t border-[var(--border-soft)] pt-4">
-              <div className="text-[11px] font-medium text-[var(--muted)]">
-                Replay Tools
-              </div>
+              <div className="text-[11px] font-medium text-[var(--muted)]">Replay Tools</div>
               <div className="mt-3 rounded-lg border border-[var(--border-soft)] bg-[var(--paper-soft)] px-3 py-2 text-[11px] text-[var(--ink)]">
-                <div className="text-[10px] font-medium text-[var(--muted)]">
-                  Replay ID
-                </div>
-                <div className="mt-1 truncate text-[12px] font-medium font-mono">
+                <div className="text-[10px] font-medium text-[var(--muted)]">Replay ID</div>
+                <div className="mt-1 truncate font-mono text-[12px] font-medium">
                   {artifact?.metadata.replay_id ?? '—'}
                 </div>
               </div>
               <div className="relative mt-3 grid gap-2">
                 <button
                   type="button"
-                  onClick={() =>
-                    artifact &&
-                    handleCopy(artifact.metadata.replay_id, 'Replay ID')
-                  }
+                  onClick={() => artifact && handleCopy(artifact.metadata.replay_id, 'Replay ID')}
                   className="rounded-md border border-[var(--border-soft)] bg-transparent px-3 py-2 text-[12px] font-medium text-[var(--muted)] transition-colors hover:border-[var(--accent-2)] hover:bg-[var(--paper-soft)] hover:text-[var(--ink)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:text-[var(--muted)]"
                   disabled={!artifact}
                 >
@@ -235,10 +206,7 @@ function App() {
                   type="button"
                   onClick={() =>
                     artifact &&
-                    handleCopy(
-                      buildReplayReference(artifact.metadata),
-                      'Replay reference',
-                    )
+                    handleCopy(buildReplayReference(artifact.metadata), 'Replay reference')
                   }
                   className="rounded-md border border-[var(--border-soft)] bg-transparent px-3 py-2 text-[12px] font-medium text-[var(--muted)] transition-colors hover:border-[var(--accent-2)] hover:bg-[var(--paper-soft)] hover:text-[var(--ink)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:text-[var(--muted)]"
                   disabled={!artifact}
@@ -250,9 +218,7 @@ function App() {
                     role="status"
                     aria-live="polite"
                     className={`pointer-events-none absolute left-1/2 top-full mt-3 -translate-x-1/2 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[11px] font-medium text-[var(--muted)] shadow-[0_2px_6px_rgba(16,24,40,0.08)] transition-all duration-200 ease-out ${
-                      copyVisible
-                        ? 'translate-y-0 opacity-100'
-                        : 'translate-y-2 opacity-0'
+                      copyVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
                     }`}
                   >
                     {copyStatus}

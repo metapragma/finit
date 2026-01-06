@@ -1,8 +1,6 @@
 import type { Artifact, Metadata, Snapshot, TokenState, StageState, Event } from './types'
 
-type ParseResult =
-  | { ok: true; artifact: Artifact }
-  | { ok: false; error: string }
+type ParseResult = { ok: true; artifact: Artifact } | { ok: false; error: string }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
@@ -33,12 +31,8 @@ export function parseArtifact(data: unknown): ParseResult {
     engine_version: isString(metadata.engine_version) ? metadata.engine_version : '',
     replay_id: isString(metadata.replay_id) ? metadata.replay_id : '',
     tick_count: isNumber(metadata.tick_count) ? metadata.tick_count : NaN,
-    tick_duration_ms: isNumber(metadata.tick_duration_ms)
-      ? metadata.tick_duration_ms
-      : NaN,
-    total_duration_ms: isNumber(metadata.total_duration_ms)
-      ? metadata.total_duration_ms
-      : NaN,
+    tick_duration_ms: isNumber(metadata.tick_duration_ms) ? metadata.tick_duration_ms : NaN,
+    total_duration_ms: isNumber(metadata.total_duration_ms) ? metadata.total_duration_ms : NaN,
   }
 
   if (

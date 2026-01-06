@@ -41,8 +41,9 @@ body {
 }
 
 .font-mono {
-  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-family:
+    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
 }
 
 .canvas-grid {
