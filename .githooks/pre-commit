@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-make format-check
+./scripts/pre-commit.sh

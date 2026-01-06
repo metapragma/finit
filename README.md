@@ -57,7 +57,7 @@ Formatting is standardized in `.editorconfig`. UI formatting uses Prettier:
 make format
 ```
 
-To enforce formatting before commits, enable the pre-commit hook:
+To enforce formatting and linting before commits (staged files only), enable the pre-commit hook:
 
 ```sh
 ./scripts/install-hooks.sh
@@ -72,6 +72,10 @@ To enforce formatting before commits, enable the pre-commit hook:
 
 ## Roadmap
 The long-term plan is to expand beyond the single scenario into related design-review scenarios (e.g., retries, rate limiting, background jobs). These are intentionally out of scope for the MVP.
+
+## Releases
+- `CHANGELOG.md` tracks notable changes.
+- `RELEASE.md` documents the release process.
 
 ## License
 MIT. See `LICENSE`.

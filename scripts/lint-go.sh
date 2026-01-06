@@ -5,14 +5,19 @@ VERSION="1.60.3"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BIN_DIR="${ROOT_DIR}/.bin"
 BIN_PATH="${BIN_DIR}/golangci-lint"
+ARGS=("$@")
+
+if [ ${#ARGS[@]} -eq 0 ]; then
+  ARGS=("./...")
+fi
 
 if command -v golangci-lint >/dev/null 2>&1; then
-  golangci-lint run ./...
+  golangci-lint run "${ARGS[@]}"
   exit 0
 fi
 
 if [ -x "${BIN_PATH}" ]; then
-  "${BIN_PATH}" run ./...
+  "${BIN_PATH}" run "${ARGS[@]}"
   exit 0
 fi
 
@@ -33,4 +38,4 @@ curl -fsSL "${URL}" -o "${TMP}"
 tar -xzf "${TMP}" -C "${BIN_DIR}" --strip-components=1 "golangci-lint-${VERSION}-${OS}-${ARCH}/golangci-lint"
 rm -f "${TMP}"
 
-"${BIN_PATH}" run ./...
+"${BIN_PATH}" run "${ARGS[@]}"

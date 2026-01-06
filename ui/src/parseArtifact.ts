@@ -1,4 +1,12 @@
-import type { Artifact, Metadata, Snapshot, TokenClass, TokenState, StageState, Event } from './types'
+import type {
+  Artifact,
+  Metadata,
+  Snapshot,
+  TokenClass,
+  TokenState,
+  StageState,
+  Event,
+} from './types'
 
 type ParseResult = { ok: true; artifact: Artifact } | { ok: false; error: string }
 
