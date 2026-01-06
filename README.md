@@ -57,14 +57,14 @@ To enforce formatting before commits, enable the pre-commit hook:
 ./scripts/install-hooks.sh
 ```
 
-## Demo path (single recommended)
+## Demo path
 1. Press Play (normal load)
 2. Switch to High Pressure (pressure + queueing)
 3. Observe priority divergence (paid vs free vs anon)
 4. Pause on trade-off moment (highlight one paid moving vs one free waiting)
 5. Toggle Inspector to reveal engine reasoning overlays
 
-## Roadmap (post-MVP)
+## Roadmap
 The long-term plan is to expand beyond the single scenario into related design-review scenarios (e.g., retries, rate limiting, background jobs). These are intentionally out of scope for the MVP.
 
 ## License
