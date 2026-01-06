@@ -40,7 +40,7 @@ function App() {
     handleFile,
     handleSwitchSlot,
     pressureArtifact,
-  } = useArtifactSlots({ onSlotChange: handleSlotChange })
+  } = useArtifactSlots({ onSlotChange: handleSlotChange, defaultArtifactUrl: '/run.json' })
   const {
     animationDuration,
     currentTick,
