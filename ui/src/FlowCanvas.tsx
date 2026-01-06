@@ -2,12 +2,23 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import gsap from 'gsap'
 import type { Artifact, TokenState } from './types'
 
+type InspectorCounts = {
+  queued: number
+  processing: number
+  done: number
+  rejected: number
+}
+
 type FlowCanvasProps = {
   artifact: Artifact
   currentTick: number
   animationDuration: number
   highlightedTokenId?: string | null
   inspectorEnabled?: boolean
+  flowLayout?: FlowLayout
+  inspectorStateCounts?: InspectorCounts | null
+  inspectorReasonCounts?: Map<string, number> | null
+  showInspectorOverlay?: boolean
 }
 
 type Point = { x: number; y: number }
@@ -18,6 +29,8 @@ type StageAnchors = {
   done: Point
   rejected: Point
 }
+
+type FlowLayout = 'horizontal' | 'vertical'
 
 const STAGE_LABELS: Record<string, string> = {
   queue: 'Waiting',
@@ -30,13 +43,42 @@ const STAGE_ORDER = ['queue', 'service', 'done', 'rejected']
 
 const gridUnit = 32
 
-const stageBaseSizes: Record<string, { width: number; height: number }> = {
-  queue: { width: 192, height: 96 },
-  service: { width: 192, height: 96 },
-  done: { width: 288, height: 192 },
-  rejected: { width: 288, height: 192 },
+const stageBaseSizesDefault: Record<string, { width: number; height: number }> =
+  {
+    queue: { width: 192, height: 96 },
+    service: { width: 192, height: 96 },
+    done: { width: 288, height: 192 },
+    rejected: { width: 288, height: 192 },
+  }
+
+const stageBaseSizesVertical: Record<string, { width: number; height: number }> =
+  {
+    queue: { width: 168, height: 88 },
+    service: { width: 168, height: 88 },
+    done: { width: 160, height: 148 },
+    rejected: { width: 160, height: 148 },
+  }
+
+type StagePadding = {
+  x: number
+  bottom: number
+  labelHeight: number
+  labelTop: number
 }
-const stagePadding = { x: 20, bottom: 20, labelHeight: 18, labelTop: 12 }
+
+const stagePaddingDefault: StagePadding = {
+  x: 20,
+  bottom: 20,
+  labelHeight: 18,
+  labelTop: 12,
+}
+
+const stagePaddingVertical: StagePadding = {
+  x: 16,
+  bottom: 12,
+  labelHeight: 16,
+  labelTop: 10,
+}
 
 const tokenSize = 10
 
@@ -48,8 +90,6 @@ const emphasisGlow: Record<string, string> = {
   PRIORITY_SCHEDULE: 'rgba(37, 63, 93, 0.2)',
   REJECT_OVERLOAD: 'rgba(91, 101, 114, 0.2)',
 }
-const stageRuleOffset = stagePadding.labelTop + stagePadding.labelHeight + 4
-
 const stageSurfaceClass = (stageId: string) => {
   switch (stageId) {
     case 'queue':
@@ -86,6 +126,9 @@ const stageRuleColor = (stageId: string) => {
       return 'var(--border)'
   }
 }
+
+const stageRuleOffset = (padding: StagePadding) =>
+  padding.labelTop + padding.labelHeight + 4
 
 const tokenClassName = (tokenClass: string) => {
   switch (tokenClass) {
@@ -125,43 +168,98 @@ const motionProfile = (
   return { duration, delay: waitDelay }
 }
 
-const stageAnchorsFromSize = (width: number, height: number): StageAnchors => {
+const stageAnchorsFromSize = (
+  width: number,
+  height: number,
+  flowLayout: FlowLayout,
+  stageSizes: Record<string, { width: number; height: number }>,
+): StageAnchors => {
   const margin = gridUnit / 2
+
+  if (flowLayout === 'vertical') {
+    const queueSize = stageSizes.queue
+    const serviceSize = stageSizes.service
+    const doneSize = stageSizes.done
+    const rejectedSize = stageSizes.rejected
+    const minGap = gridUnit / 4
+    const rowHeight = Math.max(doneSize.height, rejectedSize.height)
+    const columnX = snapToGrid(width / 2)
+    const top = margin
+    const bottom = height - margin
+    const rowY = bottom - rowHeight / 2
+    const rowTop = rowY - rowHeight / 2
+    const gapBudget = Math.max(
+      0,
+      rowTop - top - queueSize.height - serviceSize.height,
+    )
+    let gap1 = gapBudget * 0.35
+    let gap2 = gapBudget * 0.65
+    if (gapBudget >= minGap * 2) {
+      gap1 = Math.max(minGap, gap1)
+      gap2 = Math.max(minGap, gap2)
+      const total = gap1 + gap2
+      if (total > gapBudget) {
+        const scale = gapBudget / total
+        gap1 *= scale
+        gap2 *= scale
+      }
+    }
+
+    const serviceY = rowTop - gap2 - serviceSize.height / 2
+    const queueY =
+      serviceY - gap1 - (queueSize.height + serviceSize.height) / 2
+
+    const availableWidth = width - margin * 2
+    const baseRowWidth = doneSize.width + rejectedSize.width
+    const gapX = Math.max(
+      0,
+      Math.min(gridUnit * 0.6, (availableWidth - baseRowWidth) / 2),
+    )
+    const totalRowWidth = baseRowWidth + gapX
+    const startX = (width - totalRowWidth) / 2
+    const doneX = startX + doneSize.width / 2
+    const rejectedX = doneX + doneSize.width / 2 + gapX + rejectedSize.width / 2
+
+    return {
+      queue: { x: columnX, y: queueY },
+      service: { x: columnX, y: serviceY },
+      done: { x: doneX, y: rowY },
+      rejected: { x: rejectedX, y: rowY },
+    }
+  }
+
   const minGap = gridUnit / 4
-  const queueWidth = stageBaseSizes.queue.width
-  const serviceWidth = stageBaseSizes.service.width
-  const rightWidth = Math.max(
-    stageBaseSizes.done.width,
-    stageBaseSizes.rejected.width,
-  )
+  const queueSize = stageSizes.queue
+  const serviceSize = stageSizes.service
+  const rightWidth = Math.max(stageSizes.done.width, stageSizes.rejected.width)
 
   const rowY = clamp(
     snapToGrid(height * 0.52),
-    stageBaseSizes.queue.height / 2 + gridUnit,
-    height - stageBaseSizes.queue.height / 2 - gridUnit,
+    queueSize.height / 2 + gridUnit,
+    height - queueSize.height / 2 - gridUnit,
   )
 
   const available = width - margin * 2
-  const baseTotal = queueWidth + serviceWidth + rightWidth
+  const baseTotal = queueSize.width + serviceSize.width + rightWidth
   const horizontalGap = Math.max(
     minGap,
     Math.floor((available - baseTotal) / 2),
   )
-  const leftX = queueWidth / 2 + margin
+  const leftX = queueSize.width / 2 + margin
   const maxRightX = width - rightWidth / 2 - margin
 
-  let serviceX = leftX + (queueWidth + serviceWidth) / 2 + horizontalGap
-  let rightX = serviceX + (serviceWidth + rightWidth) / 2 + horizontalGap
+  let serviceX = leftX + (queueSize.width + serviceSize.width) / 2 + horizontalGap
+  let rightX = serviceX + (serviceSize.width + rightWidth) / 2 + horizontalGap
 
   if (rightX > maxRightX) {
     const shift = rightX - maxRightX
     serviceX -= shift
-    const minServiceX = leftX + (queueWidth + serviceWidth) / 2 + minGap
+    const minServiceX = leftX + (queueSize.width + serviceSize.width) / 2 + minGap
     if (serviceX < minServiceX) {
       serviceX = minServiceX
       rightX = Math.min(
         maxRightX,
-        serviceX + (serviceWidth + rightWidth) / 2 + minGap,
+        serviceX + (serviceSize.width + rightWidth) / 2 + minGap,
       )
     } else {
       rightX = maxRightX
@@ -177,8 +275,8 @@ const stageAnchorsFromSize = (width: number, height: number): StageAnchors => {
     y: rowY,
   }
   rightX = snapToGrid(rightX)
-  const doneHalf = stageBaseSizes.done.height / 2
-  const rejectedHalf = stageBaseSizes.rejected.height / 2
+  const doneHalf = stageSizes.done.height / 2
+  const rejectedHalf = stageSizes.rejected.height / 2
   const minVerticalGap = doneHalf + rejectedHalf + gridUnit
   const maxGap =
     height - (doneHalf + rejectedHalf + gridUnit * 4)
@@ -191,7 +289,8 @@ const stageAnchorsFromSize = (width: number, height: number): StageAnchors => {
   let doneY = columnCenter - verticalGap / 2
   let rejectedY = columnCenter + verticalGap / 2
 
-  const serviceBottom = service.y + stageBaseSizes.service.height / 2 + gridUnit
+  const serviceBottom =
+    service.y + stageSizes.service.height / 2 + gridUnit
   const t = (service.x - queue.x) / (rightX - queue.x)
   if (t > 0 && t < 1) {
     const lineY = queue.y + (rejectedY - queue.y) * t
@@ -250,7 +349,77 @@ type StageLayout = {
   grid: { cols: number; spacing: number }
   rows: number
   capacity: number
-  padding: { x: number; bottom: number; labelHeight: number; labelTop: number }
+  padding: StagePadding
+}
+
+const resolveFlowLayout = (width: number, height: number): FlowLayout => {
+  if (width === 0 || height === 0) return 'horizontal'
+  return width < 520 ? 'vertical' : 'horizontal'
+}
+
+const resolveStageSizes = (
+  flowLayout: FlowLayout,
+  canvasSize: { width: number; height: number },
+) => {
+  if (flowLayout === 'horizontal') {
+    return stageBaseSizesDefault
+  }
+
+  const base = stageBaseSizesVertical
+  const margin = gridUnit / 2
+  const availableWidth = Math.max(canvasSize.width - margin * 2, 0)
+  const availableHeight = Math.max(canvasSize.height - margin * 2, 0)
+  const minGapX = gridUnit / 6
+  const rowWidth = base.done.width + base.rejected.width + minGapX
+  const rowHeight = Math.max(base.done.height, base.rejected.height)
+  const minGap = gridUnit / 4
+  const baseTotalHeight =
+    base.queue.height + base.service.height + rowHeight + minGap * 2
+  const widthScale = rowWidth > 0 ? Math.min(1, availableWidth / rowWidth) : 1
+  const heightScale =
+    baseTotalHeight > 0 ? Math.min(1, availableHeight / baseTotalHeight) : 1
+  const scale = clamp(Math.min(widthScale, heightScale), 0.6, 1.05)
+
+  return {
+    queue: {
+      width: Math.round(base.queue.width * scale),
+      height: Math.round(base.queue.height * scale),
+    },
+    service: {
+      width: Math.round(base.service.width * scale),
+      height: Math.round(base.service.height * scale),
+    },
+    done: {
+      width: Math.round(base.done.width * scale),
+      height: Math.round(base.done.height * scale),
+    },
+    rejected: {
+      width: Math.round(base.rejected.width * scale),
+      height: Math.round(base.rejected.height * scale),
+    },
+  }
+}
+
+const connectionLine = (
+  from: StageLayout,
+  to: StageLayout,
+  flowLayout: FlowLayout,
+) => {
+  if (flowLayout === 'vertical') {
+    return {
+      x1: from.center.x,
+      y1: from.center.y + from.size.height / 2,
+      x2: to.center.x,
+      y2: to.center.y - to.size.height / 2,
+    }
+  }
+
+  return {
+    x1: from.center.x + from.size.width / 2,
+    y1: from.center.y,
+    x2: to.center.x - to.size.width / 2,
+    y2: to.center.y,
+  }
 }
 
 const buildTokenPositions = (
@@ -304,6 +473,10 @@ export const FlowCanvas = ({
   animationDuration,
   highlightedTokenId,
   inspectorEnabled = false,
+  flowLayout,
+  inspectorStateCounts,
+  inspectorReasonCounts,
+  showInspectorOverlay = false,
 }: FlowCanvasProps) => {
   const canvasRef = useRef<HTMLDivElement | null>(null)
   const tokenRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -327,31 +500,6 @@ export const FlowCanvas = ({
     }
     return map
   }, [snapshot])
-
-  const stateCounts = useMemo(() => {
-    const counts = {
-      queued: 0,
-      processing: 0,
-      done: 0,
-      rejected: 0,
-    }
-    for (const token of snapshot.tokens) {
-      if (token.state === 'queued') counts.queued += 1
-      else if (token.state === 'processing') counts.processing += 1
-      else if (token.state === 'done') counts.done += 1
-      else if (token.state === 'rejected') counts.rejected += 1
-    }
-    return counts
-  }, [snapshot])
-
-  const reasonCounts = useMemo(() => {
-    const counts = new Map<string, number>()
-    for (const event of artifact.events) {
-      if (event.tick !== currentTick) continue
-      counts.set(event.reason_code, (counts.get(event.reason_code) ?? 0) + 1)
-    }
-    return counts
-  }, [artifact, currentTick])
 
   const emphasisTokens = useMemo(() => {
     const map = new Map<string, string>()
@@ -441,16 +589,42 @@ export const FlowCanvas = ({
     return counts
   }, [snapshot])
 
+  const resolvedFlowLayout = useMemo(
+    () =>
+      flowLayout ?? resolveFlowLayout(canvasSize.width, canvasSize.height),
+    [canvasSize, flowLayout],
+  )
+  const stageSizes = useMemo(
+    () => resolveStageSizes(resolvedFlowLayout, canvasSize),
+    [resolvedFlowLayout, canvasSize],
+  )
+  const stagePadding = useMemo(
+    () =>
+      resolvedFlowLayout === 'vertical'
+        ? stagePaddingVertical
+        : stagePaddingDefault,
+    [resolvedFlowLayout],
+  )
+  const ruleOffset = useMemo(
+    () => stageRuleOffset(stagePadding),
+    [stagePadding],
+  )
   const anchors = useMemo(
-    () => stageAnchorsFromSize(canvasSize.width, canvasSize.height),
-    [canvasSize],
+    () =>
+      stageAnchorsFromSize(
+        canvasSize.width,
+        canvasSize.height,
+        resolvedFlowLayout,
+        stageSizes,
+      ),
+    [canvasSize, resolvedFlowLayout, stageSizes],
   )
 
   const stageLayouts = useMemo(() => {
     const layouts: Record<string, StageLayout> = {}
 
     for (const stageId of STAGE_ORDER) {
-      const size = stageBaseSizes[stageId] ?? stageBaseSizes.queue
+      const size = stageSizes[stageId] ?? stageSizes.queue
       const grid =
         stageId === 'queue'
           ? queueGrid
@@ -486,16 +660,30 @@ export const FlowCanvas = ({
         y: center.y - size.height / 2,
       }
       const origin = {
-        x: clamp(
-          snapToGrid(desiredOrigin.x),
-          gridUnit,
-          Math.max(gridUnit, canvasSize.width - size.width - gridUnit),
-        ),
-        y: clamp(
-          snapToGrid(desiredOrigin.y),
-          gridUnit,
-          Math.max(gridUnit, canvasSize.height - size.height - gridUnit),
-        ),
+        x:
+          resolvedFlowLayout === 'vertical'
+            ? clamp(
+                desiredOrigin.x,
+                gridUnit / 2,
+                Math.max(gridUnit / 2, canvasSize.width - size.width - gridUnit / 2),
+              )
+            : clamp(
+                snapToGrid(desiredOrigin.x),
+                gridUnit,
+                Math.max(gridUnit, canvasSize.width - size.width - gridUnit),
+              ),
+        y:
+          resolvedFlowLayout === 'vertical'
+            ? clamp(
+                desiredOrigin.y,
+                gridUnit / 2,
+                Math.max(gridUnit / 2, canvasSize.height - size.height - gridUnit / 2),
+              )
+            : clamp(
+                snapToGrid(desiredOrigin.y),
+                gridUnit,
+                Math.max(gridUnit, canvasSize.height - size.height - gridUnit),
+              ),
       }
 
       const snappedCenter = {
@@ -526,7 +714,7 @@ export const FlowCanvas = ({
     }
 
     return layouts
-  }, [anchors, canvasSize.height, canvasSize.width, stageCounts])
+  }, [anchors, canvasSize.height, canvasSize.width, stageCounts, stagePadding, stageSizes])
 
   const { tokenStateMap, stageIndexMap, visibleTokenIds, alphaMap } = useMemo(() => {
     const tokenMap = new Map<string, TokenState>()
@@ -739,7 +927,7 @@ export const FlowCanvas = ({
   return (
     <div
       ref={canvasRef}
-      className="canvas-grid relative h-full w-full overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--paper-soft)]"
+      className="canvas-grid relative h-full min-h-[40vh] w-full overflow-hidden rounded-xl border border-[var(--border-soft)] bg-[var(--paper-soft)] sm:min-h-[60vh] md:min-h-[62vh] lg:min-h-0"
     >
       <svg className="absolute inset-0 h-full w-full">
         <defs>
@@ -781,13 +969,14 @@ export const FlowCanvas = ({
           const from = stageLayouts[segment.from]
           const to = stageLayouts[segment.to]
           if (!from || !to) return null
+          const coords = connectionLine(from, to, resolvedFlowLayout)
           return (
             <line
               key={`${segment.from}-${segment.to}`}
-              x1={from.center.x + from.size.width / 2}
-              y1={from.center.y}
-              x2={to.center.x - to.size.width / 2}
-              y2={to.center.y}
+              x1={coords.x1}
+              y1={coords.y1}
+              x2={coords.x2}
+              y2={coords.y2}
               stroke="var(--accent)"
               strokeWidth="1.5"
               strokeOpacity="0.35"
@@ -796,42 +985,71 @@ export const FlowCanvas = ({
             />
           )
         })}
-        <line
-          x1={stageLayouts.queue.center.x + stageLayouts.queue.size.width / 2}
-          y1={stageLayouts.queue.center.y}
-          x2={
-            stageLayouts.service.center.x - stageLayouts.service.size.width / 2
-          }
-          y2={stageLayouts.service.center.y}
-          stroke="var(--border)"
-          strokeWidth="1"
-          strokeLinecap="round"
-          markerEnd="url(#flow-arrow)"
-        />
-        <line
-          x1={
-            stageLayouts.service.center.x + stageLayouts.service.size.width / 2
-          }
-          y1={stageLayouts.service.center.y}
-          x2={stageLayouts.done.center.x - stageLayouts.done.size.width / 2}
-          y2={stageLayouts.done.center.y}
-          stroke="var(--border)"
-          strokeWidth="1"
-          strokeLinecap="round"
-          markerEnd="url(#flow-arrow)"
-        />
-        <line
-          x1={stageLayouts.queue.center.x + stageLayouts.queue.size.width / 2}
-          y1={stageLayouts.queue.center.y}
-          x2={stageLayouts.rejected.center.x - stageLayouts.rejected.size.width / 2}
-          y2={stageLayouts.rejected.center.y}
-          stroke="var(--border)"
-          strokeWidth="1.25"
-          strokeOpacity="0.85"
-          strokeDasharray="4 6"
-          strokeLinecap="round"
-          markerEnd="url(#flow-arrow-muted)"
-        />
+        {(() => {
+          const coords = connectionLine(
+            stageLayouts.queue,
+            stageLayouts.service,
+            resolvedFlowLayout,
+          )
+          return (
+            <line
+              x1={coords.x1}
+              y1={coords.y1}
+              x2={coords.x2}
+              y2={coords.y2}
+              stroke="var(--border)"
+              strokeWidth="1"
+              strokeLinecap="round"
+              markerEnd="url(#flow-arrow)"
+            />
+          )
+        })()}
+        {(() => {
+          const coords = connectionLine(
+            stageLayouts.service,
+            stageLayouts.done,
+            resolvedFlowLayout,
+          )
+          return (
+            <line
+              x1={coords.x1}
+              y1={coords.y1}
+              x2={coords.x2}
+              y2={coords.y2}
+              stroke="var(--border)"
+              strokeWidth="1"
+              strokeLinecap="round"
+              markerEnd="url(#flow-arrow)"
+            />
+          )
+        })()}
+        {resolvedFlowLayout === 'vertical' ? (
+          <line
+            x1={stageLayouts.queue.center.x}
+            y1={stageLayouts.queue.center.y + stageLayouts.queue.size.height / 2}
+            x2={stageLayouts.rejected.center.x}
+            y2={stageLayouts.rejected.center.y - stageLayouts.rejected.size.height / 2}
+            stroke="var(--border)"
+            strokeWidth="1.25"
+            strokeOpacity="0.85"
+            strokeDasharray="4 6"
+            strokeLinecap="round"
+            markerEnd="url(#flow-arrow-muted)"
+          />
+        ) : (
+          <line
+            x1={stageLayouts.queue.center.x + stageLayouts.queue.size.width / 2}
+            y1={stageLayouts.queue.center.y}
+            x2={stageLayouts.rejected.center.x - stageLayouts.rejected.size.width / 2}
+            y2={stageLayouts.rejected.center.y}
+            stroke="var(--border)"
+            strokeWidth="1.25"
+            strokeOpacity="0.85"
+            strokeDasharray="4 6"
+            strokeLinecap="round"
+            markerEnd="url(#flow-arrow-muted)"
+          />
+        )}
       </svg>
 
       {STAGE_ORDER.map((stageId) => {
@@ -862,13 +1080,15 @@ export const FlowCanvas = ({
             }}
           >
             <div className={stageLabelClass(stageId)}>{label}</div>
-            <div
-              className="absolute left-4 right-4 h-px opacity-60"
-              style={{
-                top: stageRuleOffset,
-                backgroundColor: stageRuleColor(stageId),
-              }}
-            />
+            {resolvedFlowLayout === 'horizontal' ? (
+              <div
+                className="absolute left-4 right-4 h-px opacity-60"
+                style={{
+                  top: ruleOffset,
+                  backgroundColor: stageRuleColor(stageId),
+                }}
+              />
+            ) : null}
             {badgeText ? (
               <span className="absolute right-3 top-2 rounded-full border border-[var(--border-soft)] bg-[var(--paper-soft)] px-2 py-0.5 text-[10px] font-medium text-[var(--muted)]">
                 {badgeText}
@@ -895,30 +1115,32 @@ export const FlowCanvas = ({
         ))}
       </div>
 
-      {inspectorEnabled ? (
+      {inspectorEnabled && showInspectorOverlay && inspectorStateCounts ? (
         <div className="absolute left-4 top-4 w-56 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-3 text-xs text-[var(--ink)]">
           <div className="text-[10px] font-medium text-[var(--muted)]">
             Inspector
           </div>
           <div className="mt-2 space-y-1">
-            <div>Queued: {stateCounts.queued}</div>
-            <div>Processing: {stateCounts.processing}</div>
-            <div>Done: {stateCounts.done}</div>
-            <div>Rejected: {stateCounts.rejected}</div>
+            <div>Queued: {inspectorStateCounts.queued}</div>
+            <div>Processing: {inspectorStateCounts.processing}</div>
+            <div>Done: {inspectorStateCounts.done}</div>
+            <div>Rejected: {inspectorStateCounts.rejected}</div>
           </div>
           <div className="mt-3 border-t border-[var(--border-soft)] pt-2">
             <div className="text-[10px] font-medium text-[var(--muted)]">
               Reasons @ tick {currentTick}
             </div>
-            {reasonCounts.size === 0 ? (
+            {inspectorReasonCounts && inspectorReasonCounts.size === 0 ? (
               <div className="mt-1 text-[11px] text-[var(--muted)]">No events</div>
             ) : (
               <div className="mt-1 space-y-1 text-[11px]">
-                {Array.from(reasonCounts.entries()).map(([reason, count]) => (
-                  <div key={reason}>
-                    {reason} × {count}
-                  </div>
-                ))}
+                {Array.from(inspectorReasonCounts ?? []).map(
+                  ([reason, count]) => (
+                    <div key={reason}>
+                      {reason} × {count}
+                    </div>
+                  ),
+                )}
               </div>
             )}
           </div>
