@@ -11,7 +11,10 @@ type UseArtifactSlotsArgs = {
   defaultArtifactUrl?: string
 }
 
-export const useArtifactSlots = ({ onSlotChange, defaultArtifactUrl }: UseArtifactSlotsArgs = {}) => {
+export const useArtifactSlots = ({
+  onSlotChange,
+  defaultArtifactUrl,
+}: UseArtifactSlotsArgs = {}) => {
   const [baselineArtifact, setBaselineArtifact] = useState<Artifact | null>(null)
   const [pressureArtifact, setPressureArtifact] = useState<Artifact | null>(null)
   const [baselineError, setBaselineError] = useState<string | null>(null)
